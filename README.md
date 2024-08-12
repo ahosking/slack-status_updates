@@ -43,4 +43,4 @@ alias lunch="<PATH TO PYTHON>/python <PATH TO REPO>/status.py lunch"
 1. `python status.py clear` will clear your status
 2. `python status.py brb` will set you to BRB for 15 minutes
 3. `python status.py lunch` will set your status to "Lunch Time" for 60 minutes and use a random food-based emoji
-4. Lastly you can provide a custom status, emoji and duration for your own status-based flair!
+4. Lastly you can provide a custom status, emoji and duration for your own status-based flair! For example: `python status.py custom --message "Taking the kids to Soccer" --emoji ":soccer:" --time 120` ![Custom status](/docs/images/custom.png)
