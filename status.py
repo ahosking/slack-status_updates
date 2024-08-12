@@ -74,6 +74,8 @@ def clear_status(token):
 parser = argparse.ArgumentParser(description="Slack Status Manager")
 parser.add_argument("action", choices=[
                     "brb", "lunch", "custom", "clear"], help="Action to set the status")
+parser.add_argument("--emoji", type=str,
+                    help="Custom emoji for the status")
 parser.add_argument("--message", type=str,
                     help="Custom message for the status")
 parser.add_argument("--time", type=int,
@@ -95,6 +97,8 @@ elif args.action == "custom":
         exit(1)
     status_text = args.message
     status_emoji = ":speech_balloon:"  # Default emoji
+    if args.emoji:
+        status_emoji = args.emoji  # Use provided emoji
     expiration_in_seconds = args.time * 60  # Convert minutes to seconds
 elif args.action == "clear":
     for token in tokens:
