@@ -1,3 +1,21 @@
+"""
+This module contains functions to update and clear Slack statuses for
+multiple workspaces.
+
+The module uses the Slack SDK to interact with the Slack API and the 
+python-dotenv package to manage environment variables.
+
+Functions:
+- update_status(token, status_text, status_emoji, expiration_in_seconds):
+    Update the Slack status for a given token.
+- clear_status(token): Clear the Slack status for a given token.
+
+Usage:
+1. Set up your Slack workspaces and obtain the necessary tokens.
+2. Store the tokens in environment variables or a .env file.
+3. Use the functions to update or clear the statuses for your workspaces.
+"""
+
 import argparse
 import random
 import os
@@ -11,8 +29,18 @@ load_dotenv()
 
 
 # List of food-based emojis for lunch status
-food_emojis = [":pizza:", ":hamburger:", ":bento:", ":sushi:", ":taco:",
-               ":burrito:", ":ramen:", ":spaghetti:", ":sandwich:", ":fries:"]
+food_emojis = [
+    ":pizza:",
+    ":hamburger:",
+    ":bento:",
+    ":sushi:",
+    ":taco:",
+    ":burrito:",
+    ":ramen:",
+    ":spaghetti:",
+    ":sandwich:",
+    ":fries:",
+]
 
 # List of your Slack workspace tokens
 tokens = [
@@ -25,6 +53,20 @@ tokens = [
 
 
 def update_status(token, status_text, status_emoji, expiration_in_seconds):
+    """
+    Update the Slack status for a given token.
+
+    Parameters:
+    token (str): The Slack API token for the workspace.
+    status_text (str): The text to be displayed as the status.
+    status_emoji (str): The emoji to be displayed as the status.
+    expiration_in_seconds (int): The duration in seconds for which the 
+    status should be active.
+
+    Returns:
+    None: This function does not return a value. It prints a success or
+          error message to the console.
+    """
     if not token:
         print("No valid Slack token found.")
         return
@@ -35,18 +77,23 @@ def update_status(token, status_text, status_emoji, expiration_in_seconds):
 
     client = WebClient(token=token)
     try:
-        response = client.users_profile_set(
+        client.users_profile_set(
             profile={
                 "status_text": status_text,
                 "status_emoji": status_emoji,
-                "status_expiration": expiration_timestamp
+                "status_expiration": expiration_timestamp,
             }
         )
-        print(f"Status updated successfully in workspace with token: {
-              token[:12]}")
+        print(
+            f"Status updated successfully in workspace with token: {
+                token[:12]}"
+        )
     except SlackApiError as e:
-        print(f"Error updating status in workspace with token: {
-              token}: {e.response['error']}")
+        print(
+            f"Error updating status in workspace with token: {
+                token}: {e.response['error']}"
+        )
+
 
 # Function to clear status
 
@@ -58,28 +105,30 @@ def clear_status(token):
     client = WebClient(token=token)
     try:
         response = client.users_profile_set(
-            profile={
-                "status_text": "",
-                "status_emoji": "",
-                "status_expiration": 0
-            }
+            profile={"status_text": "",
+                     "status_emoji": "", "status_expiration": 0}
         )
         print(f"Status cleared successfully in workspace with token: {token}")
     except SlackApiError as e:
-        print(f"Error clearing status in workspace with token: {
-              token}: {e.response['error']}")
+        print(
+            f"Error clearing status in workspace with token: {
+                token}: {e.response['error']}"
+        )
 
 
 # Argument parsing
 parser = argparse.ArgumentParser(description="Slack Status Manager")
-parser.add_argument("action", choices=[
-                    "brb", "lunch", "custom", "clear"], help="Action to set the status")
-parser.add_argument("--emoji", type=str,
-                    help="Custom emoji for the status")
+parser.add_argument(
+    "action",
+    choices=["brb", "lunch", "custom", "clear"],
+    help="Action to set the status",
+)
+parser.add_argument("--emoji", type=str, help="Custom emoji for the status")
 parser.add_argument("--message", type=str,
                     help="Custom message for the status")
-parser.add_argument("--time", type=int,
-                    help="Duration in minutes for the custom status")
+parser.add_argument(
+    "--time", type=int, help="Duration in minutes for the custom status"
+)
 args = parser.parse_args()
 
 # Determine the action
