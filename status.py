@@ -2,11 +2,11 @@
 This module contains functions to update and clear Slack statuses for
 multiple workspaces.
 
-The module uses the Slack SDK to interact with the Slack API and the 
+The module uses the Slack SDK to interact with the Slack API and the
 python-dotenv package to manage environment variables.
 
 Functions:
-- update_status(token, status_text, status_emoji, expiration_in_seconds):
+- update_status(token, STATUS_TEXT, STATUS_EMOJI, EXPIRATION_IN_SECONDS):
     Update the Slack status for a given token.
 - clear_status(token): Clear the Slack status for a given token.
 
@@ -19,6 +19,7 @@ Usage:
 import argparse
 import random
 import os
+import sys
 import time
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -52,7 +53,8 @@ tokens = [
 # Function to update status
 
 
-def update_status(token, status_text, status_emoji, expiration_in_seconds):
+def update_status(slack_token, status_text, status_emoji,
+                  expiration_in_seconds):
     """
     Update the Slack status for a given token.
 
@@ -60,22 +62,22 @@ def update_status(token, status_text, status_emoji, expiration_in_seconds):
     token (str): The Slack API token for the workspace.
     status_text (str): The text to be displayed as the status.
     status_emoji (str): The emoji to be displayed as the status.
-    expiration_in_seconds (int): The duration in seconds for which the 
+    expiration_in_seconds (int): The duration in seconds for which the
     status should be active.
 
     Returns:
     None: This function does not return a value. It prints a success or
           error message to the console.
     """
-    if not token:
+    if not slack_token:
         print("No valid Slack token found.")
         return
-    client = WebClient(token=token)
+    client = WebClient(token=slack_token)
 
     # Calculate the expiration timestamp
     expiration_timestamp = int(time.time()) + expiration_in_seconds
 
-    client = WebClient(token=token)
+    client = WebClient(token=slack_token)
     try:
         client.users_profile_set(
             profile={
@@ -86,25 +88,47 @@ def update_status(token, status_text, status_emoji, expiration_in_seconds):
         )
         print(
             f"Status updated successfully in workspace with token: {
-                token[:12]}"
+                slack_token[:12]}"
         )
     except SlackApiError as e:
         print(
             f"Error updating status in workspace with token: {
-                token}: {e.response['error']}"
+                slack_token}: {e.response['error']}"
         )
 
 
 # Function to clear status
 
 
-def clear_status(token):
+def clear_status(slack_token):
+    """Clear the Slack status for a given token.
+
+    Args:
+        slack_token (str): The Slack API token for the workspace.
+    """
+    if not slack_token:
+        print("No valid Slack token found.")
+        return
+    client = WebClient(token=slack_token)
+    try:
+        client.users_profile_set(
+            profile={"status_text": "",
+                     "status_emoji": "", "status_expiration": 0}
+        )
+        print(f"Status cleared successfully in workspace with token: {
+              slack_token}")
+    except SlackApiError as e:
+        print(
+            f"Error clearing status in workspace with token: {
+                slack_token}: {e.response['error']}"
+        )
+
     if not token:
         print("No valid Slack token found.")
         return
     client = WebClient(token=token)
     try:
-        response = client.users_profile_set(
+        client.users_profile_set(
             profile={"status_text": "",
                      "status_emoji": "", "status_expiration": 0}
         )
@@ -133,27 +157,27 @@ args = parser.parse_args()
 
 # Determine the action
 if args.action == "brb":
-    status_text = "I'll Be Right Back!"
-    status_emoji = ":brb:"
-    expiration_in_seconds = 15 * 60  # 15 minutes
+    STATUS_TEXT = "I'll Be Right Back!"
+    STATUS_EMOJI = ":brb:"
+    EXPIRATION_IN_SECONDS = 15 * 60  # 15 minutes
 elif args.action == "lunch":
-    status_text = "Lunch Time"
-    status_emoji = random.choice(food_emojis)
-    expiration_in_seconds = 60 * 60  # 60 minutes
+    STATUS_TEXT = "Lunch Time"
+    STATUS_EMOJI = random.choice(food_emojis)
+    EXPIRATION_IN_SECONDS = 60 * 60  # 60 minutes
 elif args.action == "custom":
     if not args.message or not args.time:
         print("Custom status requires --message and --time arguments.")
-        exit(1)
-    status_text = args.message
-    status_emoji = ":speech_balloon:"  # Default emoji
+        sys.exit(1)
+    STATUS_TEXT = args.message
+    STATUS_EMOJI = ":speech_balloon:"  # Default emoji
     if args.emoji:
-        status_emoji = args.emoji  # Use provided emoji
-    expiration_in_seconds = args.time * 60  # Convert minutes to seconds
+        STATUS_EMOJI = args.emoji  # Use provided emoji
+    EXPIRATION_IN_SECONDS = args.time * 60  # Convert minutes to seconds
 elif args.action == "clear":
     for token in tokens:
         clear_status(token)
-    exit(0)
+    sys.exit(0)
 
 # Update status in all workspaces
 for token in tokens:
-    update_status(token, status_text, status_emoji, expiration_in_seconds)
+    update_status(token, STATUS_TEXT, STATUS_EMOJI, EXPIRATION_IN_SECONDS)
