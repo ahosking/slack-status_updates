@@ -116,27 +116,11 @@ def clear_status(slack_token):
                      "status_emoji": "", "status_expiration": 0}
         )
         print(f"Status cleared successfully in workspace with token: {
-              slack_token}")
+              slack_token[:12]}")
     except SlackApiError as e:
         print(
             f"Error clearing status in workspace with token: {
-                slack_token}: {e.response['error']}"
-        )
-
-    if not token:
-        print("No valid Slack token found.")
-        return
-    client = WebClient(token=token)
-    try:
-        client.users_profile_set(
-            profile={"status_text": "",
-                     "status_emoji": "", "status_expiration": 0}
-        )
-        print(f"Status cleared successfully in workspace with token: {token}")
-    except SlackApiError as e:
-        print(
-            f"Error clearing status in workspace with token: {
-                token}: {e.response['error']}"
+                slack_token[:12]}: {e.response['error']}"
         )
 
 
