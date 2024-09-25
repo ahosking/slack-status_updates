@@ -54,7 +54,7 @@ tokens = [
 
 
 def update_status(slack_token, status_text, status_emoji,
-                  expiration_in_seconds):
+                  expiration_in_seconds, presence=None):
     """
     Update the Slack status for a given token.
 
@@ -86,6 +86,10 @@ def update_status(slack_token, status_text, status_emoji,
                 "status_expiration": expiration_timestamp,
             }
         )
+        # Set presence if specified
+        if presence:
+            client.users_setPresence(presence=presence)
+
         print(
             f"Status updated successfully in workspace with token: {
                 slack_token[:12]}"
@@ -128,8 +132,8 @@ def clear_status(slack_token):
 parser = argparse.ArgumentParser(description="Slack Status Manager")
 parser.add_argument(
     "action",
-    choices=["brb", "lunch", "custom", "clear"],
-    help="Action to set the status",
+    choices=["brb", "lunch", "custom", "clear", "presence"],
+    help="Action to set the status. Note: 'presence' requires 'users:write' scope.",
 )
 parser.add_argument("--emoji", type=str, help="Custom emoji for the status")
 parser.add_argument("--message", type=str,
@@ -137,6 +141,8 @@ parser.add_argument("--message", type=str,
 parser.add_argument(
     "--time", type=int, help="Duration in minutes for the custom status"
 )
+parser.add_argument(
+    "--presence", choices=["auto", "away"], help="Set Slack presence")
 args = parser.parse_args()
 
 # Determine the action
@@ -157,11 +163,31 @@ elif args.action == "custom":
     if args.emoji:
         STATUS_EMOJI = args.emoji  # Use provided emoji
     EXPIRATION_IN_SECONDS = args.time * 60  # Convert minutes to seconds
+    PRESENCE = args.presence if args.presence else None
 elif args.action == "clear":
     for token in tokens:
         clear_status(token)
     sys.exit(0)
+elif args.action == "presence":
+    if not args.presence:
+        print("Presence action requires --presence argument.")
+        sys.exit(1)
+    PRESENCE = args.presence
+    STATUS_TEXT = None
+    STATUS_EMOJI = None
+    EXPIRATION_IN_SECONDS = None
 
 # Update status in all workspaces
 for token in tokens:
-    update_status(token, STATUS_TEXT, STATUS_EMOJI, EXPIRATION_IN_SECONDS)
+    if args.action == "presence":
+        client = WebClient(token=token)
+        try:
+            client.users_setPresence(presence=PRESENCE)
+            print(f"Presence updated successfully in workspace with token: {
+                  token[:12]}")
+        except SlackApiError as e:
+            print(f"Error updating presence in workspace with token: {
+                  token[:12]}: {e.response['error']}")
+    else:
+        update_status(token, STATUS_TEXT, STATUS_EMOJI,
+                      EXPIRATION_IN_SECONDS, PRESENCE)

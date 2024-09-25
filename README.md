@@ -14,9 +14,10 @@ Once setup, you can just call your script with python and an argument, and poof,
 2. Click "Create a New App"
 3. Select "From Scratch"
 4. On the left menu, find "OAuth & Permissions" and hit that
-5. Scroll down to scopes and Add an OAuth Scope under the "User Token Scopes", here yuo need `users.profile:write`
-6. At the top of this page you can install your app to the workspace
-7. Copy the User OAuth Token (starting in `xoxp-`) into your `.env` file (see `.env.sample`)
+5. Scroll down to scopes and Add an OAuth Scope under the "User Token Scopes", here you need `users.profile:write`
+6. For Presence changes you'll also need to add `users:write`
+7. At the top of this page you can install your app to the workspace
+8. Copy the User OAuth Token (starting in `xoxp-`) into your `.env` file (see `.env.sample`)
    
 ## Setup your virtual environment
 For me this looks like:
