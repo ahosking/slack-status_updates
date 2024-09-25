@@ -146,6 +146,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Determine the action
+PRESENCE = args.presence if args.presence else None
 if args.action == "brb":
     STATUS_TEXT = "I'll Be Right Back!"
     STATUS_EMOJI = ":brb:"
@@ -163,7 +164,6 @@ elif args.action == "custom":
     if args.emoji:
         STATUS_EMOJI = args.emoji  # Use provided emoji
     EXPIRATION_IN_SECONDS = args.time * 60  # Convert minutes to seconds
-    PRESENCE = args.presence if args.presence else None
 elif args.action == "clear":
     for token in tokens:
         clear_status(token)
